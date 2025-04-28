@@ -31,7 +31,7 @@ up:
 	docker compose -f pwd.yml up -d
 
 down:
-	docker compose down -v
+	docker compose -f pwd.yml down -v
 
 restart: down up
 
