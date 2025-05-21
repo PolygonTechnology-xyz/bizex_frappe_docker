@@ -9,6 +9,10 @@ To get started you need [Docker](https://docs.docker.com/get-docker/), [docker-c
 
 Once completed, chose one of the following two sections for next steps.
 
+## Please Readme First
+Please read the following instruction first for proper use of this repository
+- [Readme First](docs/read-me-first.md)
+
 ### Try in Play With Docker
 
 To play in an already set up sandbox, in your browser, click the button below:
