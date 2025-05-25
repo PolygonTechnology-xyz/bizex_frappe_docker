@@ -1,7 +1,7 @@
+PROJECT_NAME=amani
 IMAGE_NAME=abbirku/bizex_amani
 SITE_NAME=amani_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
 INSTALL_APPS=frappe erpnext bizex_procurement_base amani_app
-CONTAINER_NAME=bizex_amani_container
 FRONTEND_PORT=8083
