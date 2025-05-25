@@ -1,30 +1,30 @@
-include .env
+ENV_FILE ?= .env
 
 .PHONY: help build up down destroy restart shell new-site install-apps bench-start
 
 help:
 	@echo "Makefile Commands:"
-	@echo "  make build           - Build Docker image"
-	@echo "  make up              - Start containers"
-	@echo "  make down            - Stop containers"
-	@echo "  make destroy         - Remove containers and volumes"
-	@echo "  make restart         - Restart containers"
-	@echo "  make shell           - Access container shell"
-	@echo "  make new-site        - Create new Frappe site"
-	@echo "  make install-apps    - Install apps"
-	@echo "  make bench-start     - Run bench start in container"
+	@echo "  make build ENV_FILE=<env_file_name>           - Build Docker image"
+	@echo "  make up ENV_FILE=<env_file_name>              - Start containers"
+	@echo "  make down ENV_FILE=<env_file_name>            - Stop containers"
+	@echo "  make destroy ENV_FILE=<env_file_name>         - Remove containers and volumes"
+	@echo "  make restart ENV_FILE=<env_file_name>         - Restart containers"
+	@echo "  make shell ENV_FILE=<env_file_name>           - Access container shell"
+	@echo "  make new-site ENV_FILE=<env_file_name>        - Create new Frappe site"
+	@echo "  make install-apps ENV_FILE=<env_file_name>    - Install apps"
+	@echo "  make bench-start ENV_FILE=<env_file_name>     - Run bench start in container"
 
 build:
-	docker compose --env-file .env -f pwd.yml build
+	docker compose --env-file $(ENV_FILE) -f pwd.yml build
 
 up:
-	docker compose --env-file .env -f pwd.yml up -d
+	docker compose --env-file $(ENV_FILE) -f pwd.yml up -d
 
 down:
-	docker compose --env-file .env -f pwd.yml down
+	docker compose --env-file $(ENV_FILE) -f pwd.yml down
 
 destroy:
-	docker compose --env-file .env -f pwd.yml down -v
+	docker compose --env-file $(ENV_FILE) -f pwd.yml down -v
 
 restart: down up
 
