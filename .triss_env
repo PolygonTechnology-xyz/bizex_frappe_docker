@@ -3,5 +3,5 @@ SITE_NAME=triss_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
 INSTALL_APPS=erpnext hrms hrss_app
-CONTAINER_NAME=frappe_backend
+CONTAINER_NAME=triss_site_container
 FRONTEND_PORT=8082
