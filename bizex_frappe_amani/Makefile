@@ -1,5 +1,5 @@
-ENV_FILE ?= .env
-CMP_FILE ?= pwd.yml
+ENV_FILE ?= .amani_env
+CMP_FILE ?= amani.yml
 
 .PHONY: help build up down destroy restart shell new-site install-apps bench-start
 
