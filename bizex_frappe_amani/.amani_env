@@ -1,5 +1,5 @@
 PROJECT_NAME=amani
-IMAGE_NAME=abbirku/bizex_amani
+IMAGE_NAME=abbirku/bizex_amani:v1.0.1
 SITE_NAME=amani_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
