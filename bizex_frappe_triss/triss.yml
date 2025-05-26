@@ -71,6 +71,7 @@ services:
         bench new-site ${SITE_NAME} --mariadb-user-host-login-scope='%' --admin-password=${ADMIN_PASSWORD} --db-root-username=root --db-root-password=${MYSQL_ROOT_PASSWORD};
         for app in ${INSTALL_APPS}; do bench --site ${SITE_NAME} install-app $$app; done;
         bench use ${SITE_NAME};
+        bench --site ${SITE_NAME} migrate;
     environment:
       DB_HOST: db
       DB_PORT: "3306"
