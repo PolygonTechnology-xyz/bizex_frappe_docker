@@ -3,5 +3,5 @@ IMAGE_NAME=abbirku/bizex_amani
 SITE_NAME=amani_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
-INSTALL_APPS=frappe erpnext bizex_procurement_base amani_app
+INSTALL_APPS=frappe erpnext hrms bizex_procurement_base amani_app
 FRONTEND_PORT=8083
