@@ -39,10 +39,6 @@ services:
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      SITE_NAME: ${SITE_NAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      INSTALL_APPS: ${INSTALL_APPS}
     volumes:
       - amani_sites:/home/frappe/frappe-bench/sites
       - amani_logs:/home/frappe/frappe-bench/logs
@@ -82,6 +78,11 @@ services:
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
+      SITE_NAME: ${SITE_NAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      INSTALL_APPS: ${INSTALL_APPS}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_ROOT_USER: ${DB_ROOT_USER}
     volumes:
       - amani_sites:/home/frappe/frappe-bench/sites
       - amani_logs:/home/frappe/frappe-bench/logs
@@ -103,9 +104,8 @@ services:
     volumes:
       - amani_db-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD}"]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 1s
       retries: 20
 
   frontend:
