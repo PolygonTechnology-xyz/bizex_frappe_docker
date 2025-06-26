@@ -16,7 +16,7 @@ help:
 	@echo "  make bench-start CMP_FILE=<compose_file_name> ENV_FILE=<env_file_name>     - Run bench start in container"
 
 build:
-	docker compose -f $(CMP_FILE) --env-file $(ENV_FILE) build --no-cache
+	docker compose -f $(CMP_FILE) --env-file $(ENV_FILE) build
 
 up:
 	docker compose -f $(CMP_FILE) --env-file $(ENV_FILE) up -d
