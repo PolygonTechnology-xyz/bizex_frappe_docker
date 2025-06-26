@@ -1,12 +1,10 @@
-version: "3"
-
 services:
   backend:
     image: ${IMAGE_NAME}
     container_name: ${PROJECT_NAME}_backend
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
     volumes:
       - amani_sites:/home/frappe/frappe-bench/sites
@@ -21,7 +19,7 @@ services:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: "no"
     entrypoint: ["bash", "-c"]
     command:
@@ -47,7 +45,7 @@ services:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: "no"
     entrypoint: ["bash", "-c"]
     command:
@@ -86,7 +84,7 @@ services:
     image: mariadb:10.6
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
     command:
       - --character-set-server=utf8mb4
@@ -99,7 +97,15 @@ services:
     volumes:
       - amani_db-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=${MYSQL_ROOT_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "--password=${MYSQL_ROOT_PASSWORD}",
+        ]
       interval: 1s
       retries: 20
 
@@ -107,7 +113,7 @@ services:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     depends_on:
       - websocket
     restart: on-failure
@@ -131,7 +137,7 @@ services:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
     command: ["bench", "worker", "--queue", "long,default,short"]
     volumes:
@@ -142,7 +148,7 @@ services:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
     command: ["bench", "worker", "--queue", "short,default"]
     volumes:
@@ -153,7 +159,7 @@ services:
     image: redis:6.2-alpine
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
     volumes:
       - amani_redis-queue-data:/data
@@ -162,14 +168,14 @@ services:
     image: redis:6.2-alpine
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
 
   scheduler:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
     command: ["bench", "schedule"]
     volumes:
@@ -180,7 +186,7 @@ services:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
-      - frappe_network
+      - frappe_network_amani
     restart: on-failure
     command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
     volumes:
@@ -194,5 +200,5 @@ volumes:
   amani_logs:
 
 networks:
-  frappe_network:
+  frappe_network_amani:
     driver: bridge
