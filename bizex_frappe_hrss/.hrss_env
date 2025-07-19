@@ -1,7 +1,7 @@
 PROJECT_NAME=hrss
-IMAGE_NAME=abbirku/bizex_hrss
+IMAGE_NAME=abbirku/bizex_hrss:latest
 SITE_NAME=hrss_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
 INSTALL_APPS=frappe erpnext hrms hrss_app
-FRONTEND_PORT=8084
+FRONTEND_PORT=8083
