@@ -1,5 +1,5 @@
 PROJECT_NAME=hrss
-IMAGE_NAME=abbirku/bizex_hrss:latest
+IMAGE_NAME=abbirku/bizex_hrss:v1.0.3
 SITE_NAME=hrss_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
