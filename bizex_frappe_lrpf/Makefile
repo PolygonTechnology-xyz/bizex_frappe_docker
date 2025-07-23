@@ -1,5 +1,5 @@
-ENV_FILE ?= .amani_env
-CMP_FILE ?= amani.yml
+ENV_FILE ?= .lrpf_env
+CMP_FILE ?= lrpf.yml
 
 .PHONY: help build up down destroy restart shell new-site install-apps bench-start
 

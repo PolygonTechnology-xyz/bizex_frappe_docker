@@ -1,0 +1,7 @@
+PROJECT_NAME=lrpf
+IMAGE_NAME=abbirku/bizex_lrpf:v1.0.0
+SITE_NAME=lrpf_site
+ADMIN_PASSWORD=admin
+MYSQL_ROOT_PASSWORD=admin
+INSTALL_APPS=frappe erpnext hrms lms bizex
+FRONTEND_PORT=8085
