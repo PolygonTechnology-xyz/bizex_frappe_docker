@@ -1,10 +1,50 @@
+# docker-compose.yml (Improved to survive reboot without needing make down/up)
+version: '3.9'
+
 services:
+
+  init:
+    image: ${IMAGE_NAME}
+    platform: linux/amd64
+    networks:
+      - frappe_network_lrpf
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+    restart: on-failure
+    entrypoint: ["bash", "-c"]
+    command: >
+      echo "Initializing common_site_config.json..." &&
+      ls -1 apps > sites/apps.txt &&
+      bench set-config -g db_host db &&
+      bench set-config -gp db_port 3306 &&
+      bench set-config -g redis_cache redis://redis-cache:6379 &&
+      bench set-config -g redis_queue redis://redis-queue:6379 &&
+      bench set-config -g redis_socketio redis://redis-queue:6379 &&
+      bench set-config -gp socketio_port 9000
+    volumes:
+      - lrpf_sites:/home/frappe/frappe-bench/sites
+      - lrpf_logs:/home/frappe/frappe-bench/logs
+
   backend:
     image: ${IMAGE_NAME}
     container_name: ${PROJECT_NAME}_backend
     platform: linux/amd64
     networks:
       - frappe_network_lrpf
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+      init:
+        condition: service_started
     restart: on-failure
     volumes:
       - lrpf_sites:/home/frappe/frappe-bench/sites
@@ -14,32 +54,7 @@ services:
       DB_PORT: "3306"
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-
-  configurator:
-    image: ${IMAGE_NAME}
-    platform: linux/amd64
-    networks:
-      - frappe_network_lrpf
-    restart: "no"
-    entrypoint: ["bash", "-c"]
-    command:
-      - >
-        ls -1 apps > sites/apps.txt;
-        bench set-config -g db_host $$DB_HOST;
-        bench set-config -gp db_port $$DB_PORT;
-        bench set-config -g redis_cache "redis://$$REDIS_CACHE";
-        bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
-        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
-        bench set-config -gp socketio_port $$SOCKETIO_PORT;
-    environment:
-      DB_HOST: db
-      DB_PORT: "3306"
-      REDIS_CACHE: redis-cache:6379
-      REDIS_QUEUE: redis-queue:6379
-      SOCKETIO_PORT: "9000"
-    volumes:
-      - lrpf_sites:/home/frappe/frappe-bench/sites
-      - lrpf_logs:/home/frappe/frappe-bench/logs
+    command: ["bash", "-c", "sleep 5 && /home/frappe/frappe-bench/env/bin/gunicorn --chdir=/home/frappe/frappe-bench/sites --bind=0.0.0.0:8000 --threads=4 --workers=2 --worker-class=gthread --worker-tmp-dir=/dev/shm --timeout=120 --preload frappe.app:application"]
 
   create-site:
     image: ${IMAGE_NAME}
@@ -48,28 +63,21 @@ services:
       - frappe_network_lrpf
     restart: "no"
     entrypoint: ["bash", "-c"]
-    command:
-      - >
-        wait-for-it -t 120 db:3306;
-        wait-for-it -t 120 redis-cache:6379;
-        wait-for-it -t 120 redis-queue:6379;
-        export start=`date +%s`;
-        until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] &&
-          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] &&
-          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty"` ]];
-        do
-          echo "Waiting for sites/common_site_config.json to be created";
-          sleep 5;
-          if (( `date +%s`-start > 120 )); then
-            echo "could not find sites/common_site_config.json with required keys";
-            exit 1
-          fi
-        done;
-        echo "sites/common_site_config.json found";
-        bench new-site ${SITE_NAME} --mariadb-user-host-login-scope='%' --admin-password=${ADMIN_PASSWORD} --db-root-username=root --db-root-password=${MYSQL_ROOT_PASSWORD};
-        for app in ${INSTALL_APPS}; do bench --site ${SITE_NAME} install-app $$app; done;
-        bench use ${SITE_NAME};
-        bench --site ${SITE_NAME} migrate;
+    command: >
+      wait-for-it -t 120 db:3306 &&
+      wait-for-it -t 120 redis-cache:6379 &&
+      wait-for-it -t 120 redis-queue:6379 &&
+      export start=`date +%s` &&
+      until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] &&
+            [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] &&
+            [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty"` ]]; do
+        echo "Waiting for common_site_config.json..." && sleep 5 &&
+        if (( `date +%s`-start > 120 )); then echo "Timeout waiting" && exit 1; fi
+      done &&
+      bench new-site ${SITE_NAME} --mariadb-user-host-login-scope='%' --admin-password=${ADMIN_PASSWORD} --db-root-username=root --db-root-password=${MYSQL_ROOT_PASSWORD} &&
+      for app in ${INSTALL_APPS}; do bench --site ${SITE_NAME} install-app $app; done &&
+      bench use ${SITE_NAME} &&
+      bench --site ${SITE_NAME} migrate
     environment:
       DB_HOST: db
       DB_PORT: "3306"
@@ -80,42 +88,16 @@ services:
       - lrpf_sites:/home/frappe/frappe-bench/sites
       - lrpf_logs:/home/frappe/frappe-bench/logs
 
-  db:
-    image: mariadb:10.6
-    platform: linux/amd64
-    networks:
-      - frappe_network_lrpf
-    restart: on-failure
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --skip-character-set-client-handshake
-      - --skip-innodb-read-only-compressed
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - lrpf_db-data:/var/lib/mysql
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "--password=${MYSQL_ROOT_PASSWORD}",
-        ]
-      interval: 1s
-      retries: 20
-
   frontend:
     image: ${IMAGE_NAME}
     platform: linux/amd64
     networks:
       - frappe_network_lrpf
     depends_on:
-      - websocket
+      backend:
+        condition: service_started
+      websocket:
+        condition: service_started
     restart: on-failure
     command: ["nginx-entrypoint.sh"]
     environment:
@@ -132,6 +114,28 @@ services:
       - lrpf_logs:/home/frappe/frappe-bench/logs
     ports:
       - "${FRONTEND_PORT}:8080"
+
+  websocket:
+    image: ${IMAGE_NAME}
+    platform: linux/amd64
+    networks:
+      - frappe_network_lrpf
+    restart: on-failure
+    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
+    volumes:
+      - lrpf_sites:/home/frappe/frappe-bench/sites
+      - lrpf_logs:/home/frappe/frappe-bench/logs
+
+  scheduler:
+    image: ${IMAGE_NAME}
+    platform: linux/amd64
+    networks:
+      - frappe_network_lrpf
+    restart: on-failure
+    command: ["bench", "schedule"]
+    volumes:
+      - lrpf_sites:/home/frappe/frappe-bench/sites
+      - lrpf_logs:/home/frappe/frappe-bench/logs
 
   queue-long:
     image: ${IMAGE_NAME}
@@ -155,6 +159,27 @@ services:
       - lrpf_sites:/home/frappe/frappe-bench/sites
       - lrpf_logs:/home/frappe/frappe-bench/logs
 
+  db:
+    image: mariadb:10.6
+    platform: linux/amd64
+    networks:
+      - frappe_network_lrpf
+    restart: on-failure
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - lrpf_db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 1s
+      retries: 20
+
   redis-queue:
     image: redis:6.2-alpine
     platform: linux/amd64
@@ -170,28 +195,6 @@ services:
     networks:
       - frappe_network_lrpf
     restart: on-failure
-
-  scheduler:
-    image: ${IMAGE_NAME}
-    platform: linux/amd64
-    networks:
-      - frappe_network_lrpf
-    restart: on-failure
-    command: ["bench", "schedule"]
-    volumes:
-      - lrpf_sites:/home/frappe/frappe-bench/sites
-      - lrpf_logs:/home/frappe/frappe-bench/logs
-
-  websocket:
-    image: ${IMAGE_NAME}
-    platform: linux/amd64
-    networks:
-      - frappe_network_lrpf
-    restart: on-failure
-    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
-    volumes:
-      - lrpf_sites:/home/frappe/frappe-bench/sites
-      - lrpf_logs:/home/frappe/frappe-bench/logs
 
 volumes:
   lrpf_db-data:
