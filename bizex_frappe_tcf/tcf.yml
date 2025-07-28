@@ -9,8 +9,8 @@ services:
       - frappe_network
     restart: on-failure
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
     environment:
       DB_HOST: db
       DB_PORT: "3306"
@@ -40,8 +40,8 @@ services:
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
 
   create-site:
     image: ${IMAGE_NAME}
@@ -79,8 +79,8 @@ services:
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
 
   db:
     image: mariadb:10.6
@@ -97,7 +97,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - triss_db-data:/var/lib/mysql
+      - tcf_db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=${MYSQL_ROOT_PASSWORD}"]
       interval: 1s
@@ -122,8 +122,8 @@ services:
       PROXY_READ_TIMEOUT: 120
       CLIENT_MAX_BODY_SIZE: 50m
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
     ports:
       - "${FRONTEND_PORT}:8080"
 
@@ -135,8 +135,8 @@ services:
     restart: on-failure
     command: ["bench", "worker", "--queue", "long,default,short"]
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
 
   queue-short:
     image: ${IMAGE_NAME}
@@ -146,8 +146,8 @@ services:
     restart: on-failure
     command: ["bench", "worker", "--queue", "short,default"]
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
 
   redis-queue:
     image: redis:6.2-alpine
@@ -156,7 +156,7 @@ services:
       - frappe_network
     restart: on-failure
     volumes:
-      - triss_redis-queue-data:/data
+      - tcf_redis-queue-data:/data
 
   redis-cache:
     image: redis:6.2-alpine
@@ -173,8 +173,8 @@ services:
     restart: on-failure
     command: ["bench", "schedule"]
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
 
   websocket:
     image: ${IMAGE_NAME}
@@ -184,14 +184,14 @@ services:
     restart: on-failure
     command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
     volumes:
-      - triss_sites:/home/frappe/frappe-bench/sites
-      - triss_logs:/home/frappe/frappe-bench/logs
+      - tcf_sites:/home/frappe/frappe-bench/sites
+      - tcf_logs:/home/frappe/frappe-bench/logs
 
 volumes:
-  triss_db-data:
-  triss_redis-queue-data:
-  triss_sites:
-  triss_logs:
+  tcf_db-data:
+  tcf_redis-queue-data:
+  tcf_sites:
+  tcf_logs:
 
 networks:
   frappe_network:
