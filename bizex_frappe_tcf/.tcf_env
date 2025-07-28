@@ -1,0 +1,7 @@
+PROJECT_NAME=tcf
+IMAGE_NAME=abbirku/bizex_tcf:v1.0.0
+SITE_NAME=tcf_site
+ADMIN_PASSWORD=admin
+MYSQL_ROOT_PASSWORD=admin
+INSTALL_APPS=frappe erpnext hrms hrss_app
+FRONTEND_PORT=8086
