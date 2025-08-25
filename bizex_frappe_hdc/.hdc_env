@@ -1,0 +1,7 @@
+PROJECT_NAME=hdc
+IMAGE_NAME=abbirku/bizex_hdc:v1.0.0
+SITE_NAME=hdc_site
+ADMIN_PASSWORD=admin
+MYSQL_ROOT_PASSWORD=admin
+INSTALL_APPS=frappe erpnext bizex_procurement_base hdc_app
+FRONTEND_PORT=8087
