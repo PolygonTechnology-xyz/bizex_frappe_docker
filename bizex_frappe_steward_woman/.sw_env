@@ -1,0 +1,7 @@
+PROJECT_NAME=steward_woman
+IMAGE_NAME=abbirku/bizex_sw:v1.0.0
+SITE_NAME=sw_site
+ADMIN_PASSWORD=admin
+MYSQL_ROOT_PASSWORD=admin
+INSTALL_APPS=frappe erpnext hrms bizex_procurement_base bizex_hr_payroll_base sw_app
+FRONTEND_PORT=8088
