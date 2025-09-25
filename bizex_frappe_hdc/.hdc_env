@@ -1,5 +1,5 @@
 PROJECT_NAME=hdc
-IMAGE_NAME=abbirku/bizex_hdc:v1.0.7
+IMAGE_NAME=abbirku/bizex_hdc:v1.0.8
 SITE_NAME=hdc_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
