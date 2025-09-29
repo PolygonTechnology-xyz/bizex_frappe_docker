@@ -1,0 +1,18 @@
+export APPS_JSON_BASE64=$(base64 -w 0 apps_bizex_wfc.json)
+
+echo "$APPS_JSON_BASE64" | base64 --decode > apps_decoded.json
+
+docker build --no-cache \
+    --build-arg=FRAPPE_PATH=https://github.com/frappe/frappe \
+    --build-arg=FRAPPE_BRANCH=version-15 \
+    --build-arg=APPS_JSON_BASE64=$APPS_JSON_BASE64 \
+    --tag=abbirku/bizex_wfc:v1.0.0 \
+    --file=images/layered/Containerfile .
+
+docker push abbirku/bizex_wfc:v1.0.0
+
+make up
+
+docker compose -f wfc.yml logs -f create-site
+
+bench --site wfc_site set-admin-password admin

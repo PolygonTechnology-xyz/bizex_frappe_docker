@@ -1,0 +1,7 @@
+PROJECT_NAME=wfc
+IMAGE_NAME=abbirku/bizex_wfc:v1.0.0
+SITE_NAME=wfc_site
+ADMIN_PASSWORD=admin
+MYSQL_ROOT_PASSWORD=admin
+INSTALL_APPS=frappe erpnext hrms bizex_procurement_base bizex_hr_payroll_base wfc_app
+FRONTEND_PORT=8090
