@@ -1,5 +1,5 @@
 PROJECT_NAME=triss
-IMAGE_NAME=abbirku/bizex_triss:v1.1.1
+IMAGE_NAME=abbirku/bizex_triss:v2.0.0
 SITE_NAME=triss_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
