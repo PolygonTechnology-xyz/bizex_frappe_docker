@@ -1,5 +1,5 @@
 PROJECT_NAME=wfc
-IMAGE_NAME=abbirku/bizex_wfc:v2.0.0
+IMAGE_NAME=abbirku/bizex_wfc:v2.1.0
 SITE_NAME=wfc_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
