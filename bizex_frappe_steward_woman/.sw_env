@@ -1,5 +1,5 @@
 PROJECT_NAME=steward_woman
-IMAGE_NAME=abbirku/bizex_sw:v2.1.2
+IMAGE_NAME=abbirku/bizex_sw:v3.0.0
 SITE_NAME=sw_site
 ADMIN_PASSWORD=admin
 MYSQL_ROOT_PASSWORD=admin
